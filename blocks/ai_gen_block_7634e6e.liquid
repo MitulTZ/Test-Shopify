@@ -1,0 +1,553 @@
+{% doc %}
+  @prompt
+    Generate a video gallery for YouTube links
+
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-video-gallery-{{ ai_gen_id }} {
+    padding: 40px 0;
+  }
+
+  .ai-video-gallery__header-{{ ai_gen_id }} {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .ai-video-gallery__title-{{ ai_gen_id }} {
+    color: {{ block.settings.text_color }};
+    font-size: {{ block.settings.title_size }}px;
+    margin: 0 0 16px;
+  }
+
+  .ai-video-gallery__description-{{ ai_gen_id }} {
+    color: {{ block.settings.text_color }};
+    font-size: {{ block.settings.description_size }}px;
+    margin: 0;
+  }
+
+  .ai-video-gallery__grid-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: {{ block.settings.grid_gap }}px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .ai-video-gallery__item-{{ ai_gen_id }} {
+    background-color: {{ block.settings.card_background }};
+    border-radius: {{ block.settings.card_border_radius }}px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .ai-video-gallery__item-{{ ai_gen_id }}:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  .ai-video-gallery__thumbnail-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    overflow: hidden;
+  }
+
+  .ai-video-gallery__thumbnail-img-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-video-gallery__play-button-{{ ai_gen_id }} {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    background-color: rgba(0, 0, 0, 0.8);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+  }
+
+  .ai-video-gallery__play-button-{{ ai_gen_id }}:hover {
+    background-color: rgba(0, 0, 0, 0.9);
+  }
+
+  .ai-video-gallery__play-icon-{{ ai_gen_id }} {
+    width: 24px;
+    height: 24px;
+    fill: white;
+    margin-left: 3px;
+  }
+
+  .ai-video-gallery__content-{{ ai_gen_id }} {
+    padding: 20px;
+  }
+
+  .ai-video-gallery__video-title-{{ ai_gen_id }} {
+    color: {{ block.settings.text_color }};
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    line-height: 1.4;
+  }
+
+  .ai-video-gallery__video-description-{{ ai_gen_id }} {
+    color: {{ block.settings.text_color }};
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+    opacity: 0.8;
+  }
+
+  .ai-video-gallery__modal-{{ ai_gen_id }} {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+
+  .ai-video-gallery__modal-{{ ai_gen_id }}.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .ai-video-gallery__modal-content-{{ ai_gen_id }} {
+    position: relative;
+    width: 90%;
+    max-width: 800px;
+    aspect-ratio: 16/9;
+    background-color: #000;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .ai-video-gallery__iframe-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  .ai-video-gallery__close-button-{{ ai_gen_id }} {
+    position: absolute;
+    top: -50px;
+    right: 0;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 10px;
+    z-index: 1001;
+  }
+
+  .ai-video-gallery__close-button-{{ ai_gen_id }}:hover {
+    opacity: 0.7;
+  }
+
+  @media screen and (max-width: 768px) {
+    .ai-video-gallery__grid-{{ ai_gen_id }} {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .ai-video-gallery__modal-content-{{ ai_gen_id }} {
+      width: 95%;
+      margin: 20px;
+    }
+
+    .ai-video-gallery__close-button-{{ ai_gen_id }} {
+      top: -40px;
+      right: -10px;
+    }
+  }
+{% endstyle %}
+
+<video-gallery-{{ ai_gen_id }}
+  class="ai-video-gallery-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  {% if block.settings.title != blank or block.settings.description != blank %}
+    <div class="ai-video-gallery__header-{{ ai_gen_id }}">
+      {% if block.settings.title != blank %}
+        <h2 class="ai-video-gallery__title-{{ ai_gen_id }}">{{ block.settings.title }}</h2>
+      {% endif %}
+      {% if block.settings.description != blank %}
+        <div class="ai-video-gallery__description-{{ ai_gen_id }}">{{ block.settings.description }}</div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <div class="ai-video-gallery__grid-{{ ai_gen_id }}">
+    {% for i in (1..6) %}
+      {% liquid
+        assign video_url_key = 'video_' | append: i | append: '_url'
+        assign video_title_key = 'video_' | append: i | append: '_title'
+        assign video_description_key = 'video_' | append: i | append: '_description'
+        
+        assign video_url = block.settings[video_url_key]
+        assign video_title = block.settings[video_title_key]
+        assign video_description = block.settings[video_description_key]
+      %}
+
+      {% if video_url != blank %}
+        {% liquid
+          assign video_id = ''
+          if video_url contains 'youtube.com/watch?v='
+            assign video_id = video_url | split: 'v=' | last | split: '&' | first
+          elsif video_url contains 'youtu.be/'
+            assign video_id = video_url | split: 'youtu.be/' | last | split: '?' | first
+          endif
+        %}
+
+        {% if video_id != blank %}
+          <div class="ai-video-gallery__item-{{ ai_gen_id }}">
+            <div 
+              class="ai-video-gallery__thumbnail-{{ ai_gen_id }}"
+              data-video-id="{{ video_id }}"
+              role="button"
+              tabindex="0"
+              aria-label="Play video: {{ video_title | default: 'Video ' | append: i }}"
+            >
+              <img
+                src="https://img.youtube.com/vi/{{ video_id }}/maxresdefault.jpg"
+                alt="{{ video_title | default: 'Video thumbnail' | escape }}"
+                class="ai-video-gallery__thumbnail-img-{{ ai_gen_id }}"
+                loading="lazy"
+              >
+              <div class="ai-video-gallery__play-button-{{ ai_gen_id }}">
+                <svg class="ai-video-gallery__play-icon-{{ ai_gen_id }}" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+              </div>
+            </div>
+            
+            {% if video_title != blank or video_description != blank %}
+              <div class="ai-video-gallery__content-{{ ai_gen_id }}">
+                {% if video_title != blank %}
+                  <h3 class="ai-video-gallery__video-title-{{ ai_gen_id }}">{{ video_title }}</h3>
+                {% endif %}
+                {% if video_description != blank %}
+                  <p class="ai-video-gallery__video-description-{{ ai_gen_id }}">{{ video_description }}</p>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <div class="ai-video-gallery__modal-{{ ai_gen_id }}" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="ai-video-gallery__modal-content-{{ ai_gen_id }}">
+      <button 
+        class="ai-video-gallery__close-button-{{ ai_gen_id }}"
+        aria-label="Close video"
+        type="button"
+      >
+        ×
+      </button>
+      <iframe
+        class="ai-video-gallery__iframe-{{ ai_gen_id }}"
+        src=""
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+      ></iframe>
+    </div>
+  </div>
+</video-gallery-{{ ai_gen_id }}>
+
+<script>
+(function() {
+  class VideoGallery{{ ai_gen_id }} extends HTMLElement {
+    constructor() {
+      super();
+      this.modal = null;
+      this.iframe = null;
+      this.closeButton = null;
+      this.thumbnails = [];
+    }
+
+    connectedCallback() {
+      this.modal = this.querySelector('.ai-video-gallery__modal-{{ ai_gen_id }}');
+      this.iframe = this.querySelector('.ai-video-gallery__iframe-{{ ai_gen_id }}');
+      this.closeButton = this.querySelector('.ai-video-gallery__close-button-{{ ai_gen_id }}');
+      this.thumbnails = this.querySelectorAll('.ai-video-gallery__thumbnail-{{ ai_gen_id }}');
+
+      this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+      this.thumbnails.forEach(thumbnail => {
+        thumbnail.addEventListener('click', (e) => {
+          this.openVideo(e.currentTarget);
+        });
+
+        thumbnail.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this.openVideo(e.currentTarget);
+          }
+        });
+      });
+
+      this.closeButton.addEventListener('click', () => {
+        this.closeVideo();
+      });
+
+      this.modal.addEventListener('click', (e) => {
+        if (e.target === this.modal) {
+          this.closeVideo();
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.modal.classList.contains('active')) {
+          this.closeVideo();
+        }
+      });
+    }
+
+    openVideo(thumbnail) {
+      const videoId = thumbnail.dataset.videoId;
+      if (videoId) {
+        this.iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+        this.modal.classList.add('active');
+        this.modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        this.closeButton.focus();
+      }
+    }
+
+    closeVideo() {
+      this.iframe.src = '';
+      this.modal.classList.remove('active');
+      this.modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+  }
+
+  customElements.define('video-gallery-{{ ai_gen_id }}', VideoGallery{{ ai_gen_id }});
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Video Gallery",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Gallery Settings"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Gallery title",
+      "default": "Video Gallery"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Gallery description",
+      "default": "Watch our collection of videos"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Title size",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "description_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Description size",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "grid_gap",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Grid gap",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Card border radius",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Card background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Video 1"
+    },
+    {
+      "type": "url",
+      "id": "video_1_url",
+      "label": "YouTube URL"
+    },
+    {
+      "type": "text",
+      "id": "video_1_title",
+      "label": "Video title"
+    },
+    {
+      "type": "textarea",
+      "id": "video_1_description",
+      "label": "Video description"
+    },
+    {
+      "type": "header",
+      "content": "Video 2"
+    },
+    {
+      "type": "url",
+      "id": "video_2_url",
+      "label": "YouTube URL"
+    },
+    {
+      "type": "text",
+      "id": "video_2_title",
+      "label": "Video title"
+    },
+    {
+      "type": "textarea",
+      "id": "video_2_description",
+      "label": "Video description"
+    },
+    {
+      "type": "header",
+      "content": "Video 3"
+    },
+    {
+      "type": "url",
+      "id": "video_3_url",
+      "label": "YouTube URL"
+    },
+    {
+      "type": "text",
+      "id": "video_3_title",
+      "label": "Video title"
+    },
+    {
+      "type": "textarea",
+      "id": "video_3_description",
+      "label": "Video description"
+    },
+    {
+      "type": "header",
+      "content": "Video 4"
+    },
+    {
+      "type": "url",
+      "id": "video_4_url",
+      "label": "YouTube URL"
+    },
+    {
+      "type": "text",
+      "id": "video_4_title",
+      "label": "Video title"
+    },
+    {
+      "type": "textarea",
+      "id": "video_4_description",
+      "label": "Video description"
+    },
+    {
+      "type": "header",
+      "content": "Video 5"
+    },
+    {
+      "type": "url",
+      "id": "video_5_url",
+      "label": "YouTube URL"
+    },
+    {
+      "type": "text",
+      "id": "video_5_title",
+      "label": "Video title"
+    },
+    {
+      "type": "textarea",
+      "id": "video_5_description",
+      "label": "Video description"
+    },
+    {
+      "type": "header",
+      "content": "Video 6"
+    },
+    {
+      "type": "url",
+      "id": "video_6_url",
+      "label": "YouTube URL"
+    },
+    {
+      "type": "text",
+      "id": "video_6_title",
+      "label": "Video title"
+    },
+    {
+      "type": "textarea",
+      "id": "video_6_description",
+      "label": "Video description"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Video Gallery"
+    }
+  ]
+}
+{% endschema %}

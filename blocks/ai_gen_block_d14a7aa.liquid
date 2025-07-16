@@ -1,0 +1,516 @@
+{% doc %}
+  @prompt
+    Create a dynamic split-section layout where the left side features four animated counter statistics. Each counter should include a number, an optional prefix sign (like % or +), and a descriptive label—e.g., "+50 Projects Completed"—with smooth animation that counts from 0 to the target value when the user scrolls into view. On the right side, include a title, a subtitle, supporting descriptive text, and two horizontally stacked buttons for call-to-action elements like “Learn More” and “Get Started.” Ensure the design is clean, responsive, and visually balanced for optimal engagement
+
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-stats-section-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: row;
+    gap: 40px;
+    padding: 60px 0;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-stats-section-{{ ai_gen_id }} {
+      flex-direction: column;
+      padding: 40px 0;
+    }
+  }
+
+  .ai-stats-left-{{ ai_gen_id }},
+  .ai-stats-right-{{ ai_gen_id }} {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ai-stats-left-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+  }
+
+  .ai-stats-counter-{{ ai_gen_id }} {
+    text-align: center;
+    padding: 20px;
+    background-color: {{ block.settings.counter_bg_color }};
+    border-radius: {{ block.settings.counter_border_radius }}px;
+  }
+
+  .ai-stats-number-{{ ai_gen_id }} {
+    font-size: {{ block.settings.counter_font_size }}px;
+    font-weight: 700;
+    color: {{ block.settings.counter_number_color }};
+    margin-bottom: 10px;
+    line-height: 1;
+  }
+
+  .ai-stats-label-{{ ai_gen_id }} {
+    font-size: {{ block.settings.counter_label_size }}px;
+    color: {{ block.settings.counter_label_color }};
+    line-height: 1.3;
+  }
+
+  .ai-stats-right-{{ ai_gen_id }} {
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .ai-stats-title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.title_font_size }}px;
+    font-weight: 700;
+    color: {{ block.settings.title_color }};
+    margin: 0 0 10px 0;
+    line-height: 1.2;
+  }
+
+  .ai-stats-subtitle-{{ ai_gen_id }} {
+    font-size: {{ block.settings.subtitle_font_size }}px;
+    font-weight: 600;
+    color: {{ block.settings.subtitle_color }};
+    margin: 0 0 15px 0;
+    line-height: 1.3;
+  }
+
+  .ai-stats-description-{{ ai_gen_id }} {
+    font-size: {{ block.settings.description_font_size }}px;
+    color: {{ block.settings.description_color }};
+    margin-bottom: 25px;
+    line-height: 1.6;
+  }
+
+  .ai-stats-buttons-{{ ai_gen_id }} {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  .ai-stats-primary-button-{{ ai_gen_id }} {
+    padding: 12px 24px;
+    background-color: {{ block.settings.primary_button_bg }};
+    color: {{ block.settings.primary_button_color }};
+    border-radius: {{ block.settings.button_border_radius }}px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+    display: inline-block;
+    text-align: center;
+  }
+
+  .ai-stats-primary-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.primary_button_hover_bg }};
+  }
+
+  .ai-stats-secondary-button-{{ ai_gen_id }} {
+    padding: 12px 24px;
+    background-color: {{ block.settings.secondary_button_bg }};
+    color: {{ block.settings.secondary_button_color }};
+    border-radius: {{ block.settings.button_border_radius }}px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+    display: inline-block;
+    text-align: center;
+  }
+
+  .ai-stats-secondary-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.secondary_button_hover_bg }};
+  }
+{% endstyle %}
+
+<stats-counter-section-{{ ai_gen_id }} class="ai-stats-section-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-stats-left-{{ ai_gen_id }}">
+    {% for i in (1..4) %}
+      {% liquid
+        assign counter_value_key = 'counter_' | append: i | append: '_value'
+        assign counter_prefix_key = 'counter_' | append: i | append: '_prefix'
+        assign counter_label_key = 'counter_' | append: i | append: '_label'
+        
+        assign counter_value = block.settings[counter_value_key]
+        assign counter_prefix = block.settings[counter_prefix_key]
+        assign counter_label = block.settings[counter_label_key]
+      %}
+      
+      <div class="ai-stats-counter-{{ ai_gen_id }}">
+        <div class="ai-stats-number-{{ ai_gen_id }}">
+          <span class="ai-stats-prefix-{{ ai_gen_id }}">{{ counter_prefix }}</span>
+          <span class="ai-stats-count-{{ ai_gen_id }}" data-target="{{ counter_value }}">0</span>
+        </div>
+        <div class="ai-stats-label-{{ ai_gen_id }}">{{ counter_label }}</div>
+      </div>
+    {% endfor %}
+  </div>
+  
+  <div class="ai-stats-right-{{ ai_gen_id }}">
+    <h2 class="ai-stats-title-{{ ai_gen_id }}">{{ block.settings.title }}</h2>
+    <h3 class="ai-stats-subtitle-{{ ai_gen_id }}">{{ block.settings.subtitle }}</h3>
+    <div class="ai-stats-description-{{ ai_gen_id }}">{{ block.settings.description }}</div>
+    
+    <div class="ai-stats-buttons-{{ ai_gen_id }}">
+      {% if block.settings.primary_button_label != blank and block.settings.primary_button_link != blank %}
+        <a href="{{ block.settings.primary_button_link }}" class="ai-stats-primary-button-{{ ai_gen_id }}">
+          {{ block.settings.primary_button_label }}
+        </a>
+      {% endif %}
+      
+      {% if block.settings.secondary_button_label != blank and block.settings.secondary_button_link != blank %}
+        <a href="{{ block.settings.secondary_button_link }}" class="ai-stats-secondary-button-{{ ai_gen_id }}">
+          {{ block.settings.secondary_button_label }}
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</stats-counter-section-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class StatsCounterSection{{ai_gen_id}} extends HTMLElement {
+      constructor() {
+        super();
+        this.counters = this.querySelectorAll('.ai-stats-count-{{ ai_gen_id }}');
+        this.started = false;
+        this.observer = new IntersectionObserver(this.handleIntersection.bind(this), {
+          root: null,
+          rootMargin: '0px',
+          threshold: 0.1
+        });
+      }
+
+      connectedCallback() {
+        this.observer.observe(this);
+      }
+
+      disconnectedCallback() {
+        this.observer.disconnect();
+      }
+
+      handleIntersection(entries) {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !this.started) {
+            this.startCounters();
+            this.started = true;
+          }
+        });
+      }
+
+      startCounters() {
+        this.counters.forEach(counter => {
+          const target = parseInt(counter.getAttribute('data-target'), 10);
+          const duration = 2000; // 2 seconds
+          const stepTime = 50; // update every 50ms
+          const totalSteps = duration / stepTime;
+          const stepValue = target / totalSteps;
+          
+          let currentValue = 0;
+          const timer = setInterval(() => {
+            currentValue += stepValue;
+            
+            if (currentValue >= target) {
+              counter.textContent = target;
+              clearInterval(timer);
+            } else {
+              counter.textContent = Math.floor(currentValue);
+            }
+          }, stepTime);
+        });
+      }
+    }
+
+    customElements.define('stats-counter-section-{{ ai_gen_id }}', StatsCounterSection{{ai_gen_id}});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Stats with Counters",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Counter Statistics"
+    },
+    {
+      "type": "text",
+      "id": "counter_1_value",
+      "label": "Counter 1 Value",
+      "default": "95"
+    },
+    {
+      "type": "text",
+      "id": "counter_1_prefix",
+      "label": "Counter 1 Prefix",
+      "default": "+"
+    },
+    {
+      "type": "text",
+      "id": "counter_1_label",
+      "label": "Counter 1 Label",
+      "default": "Projects Completed"
+    },
+    {
+      "type": "text",
+      "id": "counter_2_value",
+      "label": "Counter 2 Value",
+      "default": "87"
+    },
+    {
+      "type": "text",
+      "id": "counter_2_prefix",
+      "label": "Counter 2 Prefix",
+      "default": "%"
+    },
+    {
+      "type": "text",
+      "id": "counter_2_label",
+      "label": "Counter 2 Label",
+      "default": "Client Satisfaction"
+    },
+    {
+      "type": "text",
+      "id": "counter_3_value",
+      "label": "Counter 3 Value",
+      "default": "25"
+    },
+    {
+      "type": "text",
+      "id": "counter_3_prefix",
+      "label": "Counter 3 Prefix",
+      "default": "+"
+    },
+    {
+      "type": "text",
+      "id": "counter_3_label",
+      "label": "Counter 3 Label",
+      "default": "Years Experience"
+    },
+    {
+      "type": "text",
+      "id": "counter_4_value",
+      "label": "Counter 4 Value",
+      "default": "120"
+    },
+    {
+      "type": "text",
+      "id": "counter_4_prefix",
+      "label": "Counter 4 Prefix",
+      "default": "+"
+    },
+    {
+      "type": "text",
+      "id": "counter_4_label",
+      "label": "Counter 4 Label",
+      "default": "Happy Clients"
+    },
+    {
+      "type": "header",
+      "content": "Counter Styling"
+    },
+    {
+      "type": "color",
+      "id": "counter_bg_color",
+      "label": "Counter Background Color",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "counter_number_color",
+      "label": "Counter Number Color",
+      "default": "#000f9f"
+    },
+    {
+      "type": "color",
+      "id": "counter_label_color",
+      "label": "Counter Label Color",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "counter_font_size",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Counter Number Size",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "counter_label_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Counter Label Size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "counter_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Counter Border Radius",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Our Achievements"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Why Choose Us"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "We pride ourselves on delivering exceptional results for our clients. Our team of experts is dedicated to providing high-quality service and innovative solutions to help your business grow and succeed."
+    },
+    {
+      "type": "header",
+      "content": "Content Styling"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "subtitle_color",
+      "label": "Subtitle Color",
+      "default": "#000f9f"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Description Color",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Title Size",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "subtitle_font_size",
+      "min": 16,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "label": "Subtitle Size",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "description_font_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Description Size",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Buttons"
+    },
+    {
+      "type": "text",
+      "id": "primary_button_label",
+      "label": "Primary Button Label",
+      "default": "Learn More"
+    },
+    {
+      "type": "url",
+      "id": "primary_button_link",
+      "label": "Primary Button Link"
+    },
+    {
+      "type": "text",
+      "id": "secondary_button_label",
+      "label": "Secondary Button Label",
+      "default": "Get Started"
+    },
+    {
+      "type": "url",
+      "id": "secondary_button_link",
+      "label": "Secondary Button Link"
+    },
+    {
+      "type": "header",
+      "content": "Button Styling"
+    },
+    {
+      "type": "color",
+      "id": "primary_button_bg",
+      "label": "Primary Button Background",
+      "default": "#000f9f"
+    },
+    {
+      "type": "color",
+      "id": "primary_button_color",
+      "label": "Primary Button Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "primary_button_hover_bg",
+      "label": "Primary Button Hover Background",
+      "default": "#000080"
+    },
+    {
+      "type": "color",
+      "id": "secondary_button_bg",
+      "label": "Secondary Button Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "secondary_button_color",
+      "label": "Secondary Button Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "secondary_button_hover_bg",
+      "label": "Secondary Button Hover Background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Border Radius",
+      "default": 4
+    }
+  ],
+  "presets": [
+    {
+      "name": "Stats with Counters"
+    }
+  ]
+}
+{% endschema %}
